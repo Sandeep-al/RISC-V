@@ -3,7 +3,7 @@ Code For RISC V Assembler
 Made by: Pratyaksh Kumar -> Main Program Skeleton, readFile(), processFile(), errorHandling(), writeBinary(), collectLabels() and arguments. 
          Parth Verma 
          Sandeep
-         Prateek Sharma
+         Prateek Sharma       s
 """
 # importing sys to get arguments
 import sys
