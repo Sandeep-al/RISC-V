@@ -7,7 +7,7 @@ Made by: Pratyaksh Kumar -> Main Program Skeleton, readFile(), processFile(), er
 """
 # importing sys to get arguments
 import sys
-
+            
 if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
     exit()
