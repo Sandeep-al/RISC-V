@@ -11,6 +11,13 @@ import sys
 if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
     exit()
+registerMap = {
+    "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
+    "t0": "00101", "t1": "00110", "t2": "00111",
+    "s0": "01000", "s1": "01001", "a0": "01010", "a1": "01011",
+    "a2": "01100", "a3": "01101", "a4": "01110", "a5": "01111",
+    "s2": "10000", "s3": "10001", "s4": "10010", "s5": "10011",
+}
 
 
 rTypeInstructions = ['add', 'sub', 'slt', 'srl', 'or', 'and']
@@ -19,7 +26,7 @@ stypeIntructions = ['sw']
 btypeInstructions = ['beq', 'bne']
 jtypeInstructions = ['jal']
 
-# array to hold all binary before finally         writing them
+# array to hold all binary before finally writing them
 toWrite = []
 
 def writeBinary(outputPath):
@@ -76,11 +83,35 @@ def readFile(file):
         print(">>> The Input File Cannot Be Found ")
         return 0
         
+# Function S-type
+def processSType(num):
+    opcode = "0100011"
+    funct3 = "010"
+    rs2 = registerMap.get(num[1], "00000")
+    imm = format(int(num[2]), '012b')
+    rs1 = registerMap.get(num[3], "00000")
+    high= imm[:7]
+    low=imm[7:]
+    return high + rs2 + rs1 + funct3 + low + opcode
+
+# Function B-type
+def processBType(num, pc, label):
+    opcode = "1100011"
+    funct3 = "000" if num[0] == "beq" else "001"
+    rs1 = registerMap.get(num[1], "00000")
+    rs2 = registerMap.get(num[2], "00000")
+    if num[3] not in label:
+        return ("ERROR: Unknown label ",num[3])
+    set = label[num[3]] - pc
+    imm = format(set, '013b')
+    Bimm = imm[0] + imm[2:8] + imm[8:12] + imm[1]
+    return Bimm[:7] + rs2 + rs1 + funct3 + Bimm[7:] + opcode
+
 def processFile(lines):
     # two passes, one for collecting labels and another for processing instructions.
     
     # first pass, collecting labels.
-    labelsDict = collectLabels(lines)
+    label = collectLabels(lines)
 
     # second pass, processing labels.
     counter = 1
@@ -89,15 +120,16 @@ def processFile(lines):
         # handling lines with labels
         if ":" in line:
             line = line.split(":")[1].strip()
-
+        num = line.replace(",", "").split()
+        instruction = num[0]
         # giving instructions to their respective functions
         instruction = line.split()[0]
         if instruction in rTypeInstructions:
             pass
         elif instruction in stypeIntructions:
-            pass
+            binary = processSType(num)
         elif instruction in btypeInstructions:
-            pass
+            binary = processBType(num, pc, label)
         elif instruction in itypeInstructions:
             pass
         elif instruction in jtypeInstructions:
