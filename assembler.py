@@ -3,14 +3,16 @@ Code For RISC V Assembler
 Made by: Pratyaksh Kumar -> Main Program Skeleton, readFile(), processFile(), errorHandling(), writeBinary(), collectLabels() and arguments. 
          Parth Verma 
          Sandeep
-         Prateek Sharma
+         Prateek Sharma       s
 """
 # importing sys to get arguments
 import sys
-            
+
+import Itype as sandeep
 if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
     exit()
+
 
 
 rTypeInstructions = ['add', 'sub', 'slt', 'srl', 'or', 'and']
@@ -160,6 +162,38 @@ def rType(lines):
     output=int(string_of_binary)
     return output
     
+=======
+registerMap = {
+    "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
+    "t0": "00101", "t1": "00110", "t2": "00111",
+    "s0": "01000", "s1": "01001", "a0": "01010", "a1": "01011",
+    "a2": "01100", "a3": "01101", "a4": "01110", "a5": "01111",
+    "s2": "10000", "s3": "10001", "s4": "10010", "s5": "10011",
+}        
+# Function S-type
+def processSType(num):
+    opcode = "0100011"
+    funct3 = "010"
+    rs2 = registerMap.get(num[1], "00000")
+    imm = format(int(num[2]), '012b')
+    rs1 = registerMap.get(num[3], "00000")
+    high= imm[:7]
+    low=imm[7:]
+    return high + rs2 + rs1 + funct3 + low + opcode
+
+# Function B-type
+def processBType(num, pc, labelsDict):
+    opcode = "1100011"
+    funct3 = "000" if num[0] == "beq" else "001"
+    rs1 = registerMap.get(num[1], "00000")
+    rs2 = registerMap.get(num[2], "00000")
+    if num[3] not in labelsDict:
+        return ("ERROR: Unknown labelsDict ",num[3])
+    set = labelsDict[num[3]] - pc
+    imm = format(set, '013b')
+    Bimm = imm[0] + imm[2:8] + imm[8:12] + imm[1]
+    return Bimm[:7] + rs2 + rs1 + funct3 + Bimm[7:] + opcode
+
 def processFile(lines):
     # two passes, one for collecting labels and another for processing instructions.
     
@@ -173,7 +207,8 @@ def processFile(lines):
         # handling lines with labels
         if ":" in line:
             line = line.split(":")[1].strip()
-
+        num = line.replace(",", "").split()
+        instruction = num[0]
         # giving instructions to their respective functions
         instruction = line.split()[0]
         if instruction in rTypeInstructions:
@@ -181,13 +216,15 @@ def processFile(lines):
             toWrite.append(output)
             pass
         elif instruction in stypeIntructions:
-            pass
+            binary = processSType(num)
+            toWrite.append(binary)
         elif instruction in btypeInstructions:
-            pass
+            binary = processBType(num, pc, labelsDict)
+            toWrite.append(binary)
         elif instruction in itypeInstructions:
-            pass
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
         elif instruction in jtypeInstructions:
-            pass
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
         else:
             errorHandling(counter, 1)
         
