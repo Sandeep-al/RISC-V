@@ -19,7 +19,7 @@ stypeIntructions = ['sw']
 btypeInstructions = ['beq', 'bne']
 jtypeInstructions = ['jal']
 
-# array to hold all binary before finally writing them
+# array to hold all binary before finally         writing them
 toWrite = []
 
 def writeBinary(outputPath):
