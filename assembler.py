@@ -76,7 +76,7 @@ def readFile(file):
         print(">>> The Input File Cannot Be Found ")
         return 0
 #R type instructions
-def rType(line):
+def rType(lines):
     rs_dict = {
     "zero": "00000",
     "x0": "00000",
