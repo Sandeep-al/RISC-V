@@ -162,7 +162,7 @@ def rType(lines):
     output=int(string_of_binary)
     return output
     
-=======
+
 registerMap = {
     "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
     "t0": "00101", "t1": "00110", "t2": "00111",
