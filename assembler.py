@@ -151,7 +151,12 @@ def rType(lines):
             line = line.split(":")[1].strip()
         # giving instructions to their respective functions
         instruction = line.split()[0]
-    string_of_binary=main_dict[instruction[0]]+rs_dict[line.split()[3]]+rs_dict[line.split()[2].rstrip(",")]+main_dict[instruction[1]]+rs_dict[line.split()[1].r.strip(",")]+main_dict[instruction[2]]
+    string_of_binary = (
+    main_dict[instruction][0] + rs_dict[line.split()[3]] +
+    rs_dict[line.split()[2].rstrip(",")] + main_dict[instruction][1] +
+    rs_dict[line.split()[1].rstrip(",")] + main_dict[instruction][2]
+)
+
     output=int(string_of_binary)
     return output
     
