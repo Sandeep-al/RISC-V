@@ -7,6 +7,7 @@ Made by: Pratyaksh Kumar -> Main Program Skeleton, readFile(), processFile(), er
 """
 # importing sys to get arguments
 import sys
+import Itype as sandeep
 
 if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
@@ -99,9 +100,9 @@ def processFile(lines):
         elif instruction in btypeInstructions:
             pass
         elif instruction in itypeInstructions:
-            pass
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
         elif instruction in jtypeInstructions:
-            pass
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
         else:
             errorHandling(counter, 1)
         
