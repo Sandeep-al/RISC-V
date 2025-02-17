@@ -13,8 +13,6 @@ if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
     exit()
 
-
-
 rTypeInstructions = ['add', 'sub', 'slt', 'srl', 'or', 'and']
 itypeInstructions = ['lw', 'addi', 'jalr']
 stypeIntructions = ['sw']
@@ -162,7 +160,6 @@ def rType(line):
 )
     return string_of_binary
     
- 
 
 registerMap = {
     "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
