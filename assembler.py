@@ -151,7 +151,7 @@ def rType(line):
     # handling lines with labels
     if ":" in line:
         line = line.split(":")[1].strip()
-    list_of_line = line.replace(",", "").split()
+    list_of_line = line.replace(",", " ").split()
     # giving instructions to their respective functions
     instruction = list_of_line[0]
     instruction = line.split()[0]
