@@ -161,7 +161,7 @@ def rType(line):
     rs_dict[list_of_line[1]] + main_dict[instruction][2]
 )
     return string_of_binary
-    
+
  
 
 registerMap = {
