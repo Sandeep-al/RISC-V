@@ -78,7 +78,7 @@ def readFile(file):
         print(">>> The Input File Cannot Be Found ")
         return 0
 #R type instructions
-def rType(lines):
+def rType(line):
     rs_dict = {
     "zero": "00000",
     "x0": "00000",
@@ -147,17 +147,23 @@ def rType(lines):
     "t6": "11111",
 }
     main_dict = {'add':["0000000","000","0110011"], 'sub':["0100000","000","0110011"], 'slt':["0000000","010","0110011"], 'srl':["0000000","101","0110011"], 'or':["0000000","110","0110011"], 'and':["0000000","111","0110011"]}
-    for line in lines:
-        # handling lines with labels
-        if ":" in line:
-            line = line.split(":")[1].strip()
-        # giving instructions to their respective functions
-        instruction = line.split()[0]
-    string_of_binary=main_dict[instruction[0]]+rs_dict[line.split()[3]]+rs_dict[line.split()[2].rstrip(",")]+main_dict[instruction[1]]+rs_dict[line.split()[1].r.strip(",")]+main_dict[instruction[2]]
-    output=int(string_of_binary)
-    return output
-    
-=======
+
+    # handling lines with labels
+    if ":" in line:
+        line = line.split(":")[1].strip()
+    list_of_line = line.replace(",", " ").split()
+    # giving instructions to their respective functions
+    instruction = list_of_line[0]
+    instruction = line.split()[0]
+    string_of_binary = (
+    main_dict[instruction][0] + rs_dict[list_of_line[3]] +
+    rs_dict[list_of_line[2]] + main_dict[instruction][1] +
+    rs_dict[list_of_line[1]] + main_dict[instruction][2]
+)
+    return string_of_binary
+
+ 
+
 registerMap = {
     "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
     "t0": "00101", "t1": "00110", "t2": "00111",
