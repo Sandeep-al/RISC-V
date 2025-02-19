@@ -100,9 +100,9 @@ def processFile(lines):
         elif instruction in btypeInstructions:
             pass
         elif instruction in itypeInstructions:
-            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc,counter)))
         elif instruction in jtypeInstructions:
-            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
+            toWrite.append((sandeep.breakinstruction(line,labelsDict,pc,counter)))
         else:
             errorHandling(counter, 1)
         
