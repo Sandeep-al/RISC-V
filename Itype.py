@@ -125,7 +125,7 @@ def Itypeinstructions(op,imm,rd,rs1):
                 b=j
                 break
     
-    x=f'{decimaltobin(imm,12)} {a} {dict1[op][1]} {b} {dict1[op][0]}'
+    x=f'{decimaltobin(imm,12)}{a}{dict1[op][1]}{b}{dict1[op][0]}'
     return x
 
 def Jtypeinstructions(op,imm,rd):
@@ -133,7 +133,7 @@ def Jtypeinstructions(op,imm,rd):
             if rd in i:
                 b=j
                 break
-    x=f'{decimaltobin(imm,20)} {b} {dict1[op][0]}'
+    x=f'{decimaltobin(imm,20)}{b}{dict1[op][0]}'
     return x
 
 
