@@ -69,7 +69,7 @@ def decimaltobin(n,x):
     return format(n, f'0{str(x)}b')
     
 
-def breakinstruction(i,labelsDict,pc):
+def breakinstruction(i,labelsDict,pc,lineNo):
     if i[0:2]=="lw":
         a="lw"
         i=i[3:]
@@ -107,15 +107,21 @@ def breakinstruction(i,labelsDict,pc):
         rd=i[0]
         
         imm=i[1]
+        if 
         if imm in labelsDict:
             imm=labelsDict[imm]-pc
             
-        else:
+        elif imm.isdigit():
              imm=int(imm)
+        
+        else:
+            f">>> ERROR: Typo in Register Naming at Line {lineNo}"
         
         return Jtypeinstructions(a,imm,rd)
     return Itypeinstructions(a,imm,rd,rs1)    
-def Itypeinstructions(op,imm,rd,rs1):
+def Itypeinstructions(op,imm,rd,rs1,lineNo):
+    a=0;
+    b=0;
     for j,i in rs_dict.items():
             if rs1 in i:
                 a=j
@@ -124,15 +130,21 @@ def Itypeinstructions(op,imm,rd,rs1):
             if rd in i:
                 b=j
                 break
+
+    if (a==0 or b==0):
+        return f">>> ERROR: Typo in Register Naming at Line {lineNo}
     
     x=f'{decimaltobin(imm,12)}{a}{dict1[op][1]}{b}{dict1[op][0]}'
     return x
 
-def Jtypeinstructions(op,imm,rd):
+def Jtypeinstructions(op,imm,rd,lineNo):
+    b=0
     for j,i in rs_dict.items():
             if rd in i:
                 b=j
                 break
+    if (b==0):
+        return f">>> ERROR: Typo in Register Naming at Line {lineNo}
     x=f'{decimaltobin(imm,20)}{b}{dict1[op][0]}'
     return x
 
