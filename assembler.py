@@ -161,39 +161,59 @@ def rType(line):
     rs_dict[list_of_line[1]] + main_dict[instruction][2]
 )
     return string_of_binary
-
- 
-
-registerMap = {
-    "zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
+     
+register = {"zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
     "t0": "00101", "t1": "00110", "t2": "00111",
     "s0": "01000", "s1": "01001", "a0": "01010", "a1": "01011",
-    "a2": "01100", "a3": "01101", "a4": "01110", "a5": "01111",
-    "s2": "10000", "s3": "10001", "s4": "10010", "s5": "10011",
-}        
-# Function S-type
-def processSType(num):
-    opcode = "0100011"
-    funct3 = "010"
-    rs2 = registerMap.get(num[1], "00000")
-    imm = format(int(num[2]), '012b')
-    rs1 = registerMap.get(num[3], "00000")
-    high= imm[:7]
-    low=imm[7:]
-    return high + rs2 + rs1 + funct3 + low + opcode
+    "s2": "01010",  
+    "s3": "01100", "s4": "01101", "s5": "01110", 
+    "s6": "01111"}
 
-# Function B-type
-def processBType(num, pc, labelsDict):
-    opcode = "1100011"
-    funct3 = "000" if num[0] == "beq" else "001"
-    rs1 = registerMap.get(num[1], "00000")
-    rs2 = registerMap.get(num[2], "00000")
-    if num[3] not in labelsDict:
-        return ("ERROR: Unknown labelsDict ",num[3])
-    set = labelsDict[num[3]] - pc
-    imm = format(set, '013b')
-    Bimm = imm[0] + imm[2:8] + imm[8:12] + imm[1]
-    return Bimm[:7] + rs2 + rs1 + funct3 + Bimm[7:] + opcode
+def Btype(line, labelsDict, pc, counter):
+    elements=line.replace(",",  " ").split()
+    instr=elements[0]   
+    rs1=elements[1]     
+    rs2=elements[2]    
+    target=elements[3]  
+    if target.startswith("0x") or target.isdigit():
+        try:
+            if target.startswith("0x"):
+                value=int(target,16)  
+            else:
+                value=int(target)     
+        except Exception as e:  
+            errorHandling(counter, 4)
+            return None
+        offset=value
+    else:
+        if target not in labelsDict:  
+            errorHandling(counter, 2)
+            return None
+        offset=labelsDict[target]-pc
+    imm=format((offset >> 1) & 0xFFF, '012b') 
+    opcode="1100011"  
+    func3DICT={"beq": "000", "bne": "001", "blt": "100"}  
+    if instr not in func3DICT:  
+        errorHandling(counter, 1)
+        return None
+    funct3 = func3DICT[instr]
+    binaryInstr = (imm[0]+imm[2:8]+register[rs2]+register[rs1]+funct3+imm[8:12]+imm[1]+opcode)
+    return binaryInstr
+
+def Stype(line, counter):
+    opcode='0100011'   
+    funct3='010'         
+    elements=line.replace(",",   ' ').split()
+    if len(elements)!=3:   
+        errorHandling(counter, 1)
+        return None
+    regSRC=elements[1]       
+    offset=elements[2]    
+    offset=int(offset.split("(")[0])  
+    base=offset.split("(")[1][:-1]   
+    imm=format(offset & 0xFFF, '012b')   
+    binary=(imm[:7]+register.get(base, '00000')+register.get(regSRC, '00000')+funct3+imm[7:]+opcode)
+    return binary
 
 def processFile(lines):
     # two passes, one for collecting labels and another for processing instructions.
@@ -217,10 +237,14 @@ def processFile(lines):
             toWrite.append(output)
             pass
         elif instruction in stypeIntructions:
-            binary = processSType(num)
+            binary = Stype(line, counter)
+            if binary is None:
+                errorHandling(counter, 1)
             toWrite.append(binary)
         elif instruction in btypeInstructions:
-            binary = processBType(num, pc, labelsDict)
+            binary = Btype(line, labelsDict, pc, counter)
+            if binary is None:
+                errorHandling(counter, 1)
             toWrite.append(binary)
         elif instruction in itypeInstructions:
             toWrite.append((sandeep.breakinstruction(line,labelsDict,pc)))
