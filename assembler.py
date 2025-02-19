@@ -78,7 +78,7 @@ def readFile(file):
         print(">>> The Input File Cannot Be Found ")
         return 0
 #R type instructions
-def rType(line):
+def rType(line,counter):
     rs_dict = {
     "zero": "00000",
     "x0": "00000",
@@ -155,6 +155,15 @@ def rType(line):
     # giving instructions to their respective functions
     instruction = list_of_line[0]
     instruction = line.split()[0]
+    reg_1= list_of_line[1]
+    reg_2= list_of_line[2]
+    reg_3= list_of_line[3]
+    if reg_1 not in rs_dict:
+        errorHandling(counter, 3)
+    if reg_2 not in rs_dict:
+        errorHandling(counter, 3)
+    if reg_3 not in rs_dict:
+        errorHandling(counter, 3)
     string_of_binary = (
     main_dict[instruction][0] + rs_dict[list_of_line[3]] +
     rs_dict[list_of_line[2]] + main_dict[instruction][1] +
@@ -213,7 +222,7 @@ def processFile(lines):
         # giving instructions to their respective functions
         instruction = line.split()[0]
         if instruction in rTypeInstructions:
-            output=rType(line)
+            output=rType(line,counter)
             toWrite.append(output)
             pass
         elif instruction in stypeIntructions:
