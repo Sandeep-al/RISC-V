@@ -1,13 +1,11 @@
 """" 
 Code For RISC V Assembler
-Made by: Pratyaksh Kumar -> Main Program Skeleton, readFile(), processFile(), errorHandling(), writeBinary(), collectLabels() and arguments. 
-         Parth Verma 
-         Sandeep
-         Prateek Sharma       s
+Made by: Pratyaksh Kumar -> Main Program Skeleton, Input, Output and Error Handling.
+         Parth Verma -> R Type
+         Sandeep -> I Type Instructions and J Type Instructions, Debugging. 
+         Prateek Sharma -> S Type and B Type Instructions 
 """
-# importing sys to get arguments
 import sys
-
 import Itype as sandeep
 if len(sys.argv) != 3:
     print(">>> ERROR: Input and Output Files Not Provided")
@@ -21,7 +19,6 @@ stypeIntructions = ['sw']
 btypeInstructions = ['beq', 'bne']
 jtypeInstructions = ['jal']
 
-# array to hold all binary before finally writing them
 toWrite = []
 
 def writeBinary(outputPath):
@@ -54,30 +51,23 @@ def errorHandling(lineNo, errorType):
 
 def readFile(file):
     flagVirtualHalt = False
-
-    # try block to load file and raise error if it doesn't exist.
     try:
         with open(file) as f:
             lines = []
             for line in f.readlines():
                 if line.strip() != "":
-                    
                     line = line.split("\n")[0]
                     if line == "beq zero,zero,0":
                         flagVirtualHalt = True
-
                     lines.append(line)
-
-        # flag to check if a virtual halt is present in the program or not, will raise error if not!
         if flagVirtualHalt == False:
             errorHandling( None, 0)
             return 0
-        
         return lines
     except:
         print(">>> The Input File Cannot Be Found ")
         return 0
-#R type instructions
+
 def rType(line,counter):
     rs_dict = {
     "zero": "00000",
@@ -147,12 +137,9 @@ def rType(line,counter):
     "t6": "11111",
 }
     main_dict = {'add':["0000000","000","0110011"], 'sub':["0100000","000","0110011"], 'slt':["0000000","010","0110011"], 'srl':["0000000","101","0110011"], 'or':["0000000","110","0110011"], 'and':["0000000","111","0110011"]}
-
-    # handling lines with labels
     if ":" in line:
         line = line.split(":")[1].strip()
     list_of_line = line.replace(",", " ").split()
-    # giving instructions to their respective functions
     instruction = list_of_line[0]
     instruction = line.split()[0]
     reg_1= list_of_line[1]
@@ -171,75 +158,77 @@ def rType(line,counter):
 )
     return string_of_binary
      
-register = {"zero": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
-    "t0": "00101", "t1": "00110", "t2": "00111",
+register = {
+    "zero":"00000","s0": "00000", "ra": "00001", "sp": "00010", "gp": "00011",
+    "tp": "00100", "t0": "00101", "t1": "00110", "t2": "00111",
     "s0": "01000", "s1": "01001", "a0": "01010", "a1": "01011",
-    "s2": "01010",  
-    "s3": "01100", "s4": "01101", "s5": "01110", 
-    "s6": "01111"}
+    "a2": "01100", "a3": "01101", "a4": "01110", "a5": "01111",
+    "a6": "10000", "a7": "10001", "s2": "10010", "s3": "10011",
+    "s4": "10100", "s5": "10101", "s6": "10110", "s7": "10111",
+    "s8": "11000", "s9": "11001", "s10": "11010", "s11": "11011",
+    "t3": "11100", "t4": "11101", "t5": "11110", "t6": "11111"
+}
 
 def Btype(line, labelsDict, pc, counter):
-    elements=line.replace(",",  " ").split()
-    instr=elements[0]   
-    rs1=elements[1]     
-    rs2=elements[2]    
-    target=elements[3]  
+    position = {"beq": "000", "bne": "001", "blt": "100"}
+    elements = line.replace(",", " ").split()
+    if len(elements) != 4:
+        errorHandling(counter, 1)
+        return None
+    instruction, rs1, rs2, target = elements[0], elements[1], elements[2], elements[3]
+    if rs1 not in register or rs2 not in register:
+        errorHandling(counter, 3)
+        return None
     if target.startswith("0x") or target.isdigit():
         try:
-            if target.startswith("0x"):
-                value=int(target,16)  
-            else:
-                value=int(target)     
-        except Exception as e:  
+            offset = int(target, 16) if target.startswith("0x") else int(target)
+        except:
             errorHandling(counter, 4)
             return None
-        offset=value
     else:
-        if target not in labelsDict:  
+        if target not in labelsDict:
             errorHandling(counter, 2)
             return None
-        offset=labelsDict[target]-pc
-    imm=format((offset >> 1) & 0xFFF, '012b') 
-    opcode="1100011"  
-    func3DICT={"beq": "000", "bne": "001", "blt": "100"}  
-    if instr not in func3DICT:  
+        offset = labelsDict[target] - pc
+    imm = format((offset >> 1) & 0xFFF, '012b')
+    if instruction not in position:
         errorHandling(counter, 1)
         return None
-    funct3 = func3DICT[instr]
-    binaryInstr = (imm[0]+imm[2:8]+register[rs2]+register[rs1]+funct3+imm[8:12]+imm[1]+opcode)
-    return binaryInstr
+    opcode = "1100011"
+    funct3 = position[instruction]
+    binary = (imm[0] + imm[2:8] + register[rs2] + register[rs1]+funct3 + imm[8:12] + imm[1] + opcode)
+    return binary
 
 def Stype(line, counter):
-    opcode='0100011'   
-    funct3='010'         
-    elements=line.replace(",",   ' ').split()
-    if len(elements)!=3:   
+    opcode,funct3 = "0100011","010"
+    elements = line.replace(",", " ").split()
+    if len(elements) != 3:
         errorHandling(counter, 1)
         return None
-    regSRC=elements[1]       
-    offset=elements[2]    
-    offset=int(offset.split("(")[0])  
-    base=offset.split("(")[1][:-1]   
-    imm=format(offset & 0xFFF, '012b')   
-    binary=(imm[:7]+register.get(base, '00000')+register.get(regSRC, '00000')+funct3+imm[7:]+opcode)
+    regSRC, registerOffset = elements[1], elements[2]
+    try:
+        offset = int(registerOffset.split("(")[0])
+        base= registerOffset.split("(")[1][:-1]
+    except:
+        errorHandling(counter, 4)
+        return None
+    if regSRC not in register or base not in register:
+        errorHandling(counter, 3)
+        return None
+    imm = format(offset & 0xFFF, '012b')
+    binary= (imm[0:7] + register[regSRC] +register[base] + funct3 + imm[7:12] + opcode)
     return binary
 
 def processFile(lines):
-    # two passes, one for collecting labels and another for processing instructions.
-    
-    # first pass, collecting labels.
-    labelsDict = collectLabels(lines)
 
-    # second pass, processing labels.
+    labelsDict = collectLabels(lines)
     counter = 1
     pc = 0x00000000
     for line in lines:
-        # handling lines with labels
         if ":" in line:
             line = line.split(":")[1].strip()
         num = line.replace(",", "").split()
         instruction = num[0]
-        # giving instructions to their respective functions
         instruction = line.split()[0]
         if instruction in rTypeInstructions:
             output=rType(line,counter)
@@ -261,18 +250,13 @@ def processFile(lines):
             toWrite.append((sandeep.breakinstruction(line,labelsDict,pc,counter)))
         else:
             errorHandling(counter, 1)
-        
         counter+= 1
         pc += 0x00000004
 
-    
-    # Writing Binary To Output File
     writeBinary(outputPath)
     print(f">>> {inputPath} processed as {outputPath}")
 
-
 inputPath = sys.argv[1]
 outputPath = sys.argv[2]
-
 
 processFile(readFile(inputPath))

@@ -66,6 +66,9 @@ rs_dict = {
 def decimaltobin(n,x):
     if n<0:
         n=2**x+n    
+    elif n==0:
+         return "0"*x
+    
     return format(n, f'0{str(x)}b')
     
 
@@ -99,29 +102,31 @@ def breakinstruction(i,labelsDict,pc,lineNo):
         imm=int(i[2])
         rs1=i[1]
 
-    elif i[0:3]=="jal":
+    elif i.startswith("jal"):
         a="jal"
-        i=i[4:]
-        i.strip()
-        i=i.split(",")
-        rd=i[0]
+        i=i[3:].strip()
         
-        imm=i[1]
-        if 
+        i=i.split(",")
+        rd=i[0].strip()
+        
+        imm=i[1].strip()
+
         if imm in labelsDict:
-            imm=labelsDict[imm]-pc
+            imm1=labelsDict[imm] - pc
             
-        elif imm.isdigit():
-             imm=int(imm)
+        elif imm.lstrip("-").isdigit():
+            imm1 = int(imm)
+            
+            
         
         else:
-            f">>> ERROR: Typo in Register Naming at Line {lineNo}"
+            return f">>> ERROR: Typo in Register Naming at Line {lineNo}"
         
-        return Jtypeinstructions(a,imm,rd)
-    return Itypeinstructions(a,imm,rd,rs1)    
+        return Jtypeinstructions(a,imm1,rd,lineNo)
+    return Itypeinstructions(a,imm,rd,rs1,lineNo)
 def Itypeinstructions(op,imm,rd,rs1,lineNo):
-    a=0;
-    b=0;
+    a=0
+    b=0
     for j,i in rs_dict.items():
             if rs1 in i:
                 a=j
@@ -132,21 +137,33 @@ def Itypeinstructions(op,imm,rd,rs1,lineNo):
                 break
 
     if (a==0 or b==0):
-        return f">>> ERROR: Typo in Register Naming at Line {lineNo}
+        return f">>> ERROR: Typo in Register Naming at Line {lineNo}"
     
-    x=f'{decimaltobin(imm,12)}{a}{dict1[op][1]}{b}{dict1[op][0]}'
+    x=f'{decimaltobin(int(imm),12)}{a}{dict1[op][1]}{b}{dict1[op][0]}'
     return x
 
-def Jtypeinstructions(op,imm,rd,lineNo):
+def Jtypeinstructions(op,imm1,rd,lineNo):
     b=0
     for j,i in rs_dict.items():
             if rd in i:
                 b=j
                 break
     if (b==0):
-        return f">>> ERROR: Typo in Register Naming at Line {lineNo}
-    x=f'{decimaltobin(imm,20)}{b}{dict1[op][0]}'
-    return x
+        return f">>> ERROR: Typo in Register Naming at Line {lineNo}"
+    
+    imm1=decimaltobin(imm1,20)
+    if imm1[0]=="1":
+         imm1="1"+imm1[0:19]
+    else:
+         imm1="0"+imm1[0:19]
+
+    x=imm1[0]+imm1[10:]+imm1[9]+imm1[1:9]
+
+    return f"{x}{b}{dict1[op][0]}"
+   
+    
+    
+    
 
 
 
